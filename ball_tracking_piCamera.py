@@ -10,15 +10,15 @@ import socket
 TCP_IP = '192.168.0.11'
 TCP_PORT = 5005
 BUFFER_SIZE = 60
-SEND2TCP = True
+SEND2TCP = False
 
 #Output settings
-SHOW = False
-SHOW_CIRCLE = False
-SHOW_PATH = False
-
-sok = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-sok.connect((TCP_IP, TCP_PORT))
+SHOW = True
+SHOW_CIRCLE = True
+SHOW_PATH = True
+if SEND2TCP:
+    sok = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sok.connect((TCP_IP, TCP_PORT))
 
 #initialize picamera
 camera = PiCamera()
@@ -29,8 +29,8 @@ rawCapture = PiRGBArray(camera, size=(640, 480))
 time.sleep(0.1)
 
 #define color range
-greenLower = (20, 105, 36)
-greenUpper = (155, 255, 255)
+greenLower = (57, 165, 39)
+greenUpper = (100, 255, 255)
 
 pts = deque(maxlen=64)
 
