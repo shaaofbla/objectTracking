@@ -1,5 +1,7 @@
 from picamera.array import PiRGBArray
 from picamera import PiCamera
+from imutils.video.pivideostream import PiVideoStream
+from imutils.video import FPS
 from collections import deque
 import numpy as np
 import time
@@ -10,23 +12,26 @@ import socket
 TCP_IP = '192.168.0.11'
 TCP_PORT = 5005
 BUFFER_SIZE = 60
-SEND2TCP = False
+SEND2TCP = True
 
 #Output settings
-SHOW = True
-SHOW_CIRCLE = True
-SHOW_PATH = True
+SHOW = False
+SHOW_CIRCLE = False
+SHOW_PATH = False
 if SEND2TCP:
     sok = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sok.connect((TCP_IP, TCP_PORT))
 
 #initialize picamera
-camera = PiCamera()
-camera.resolution = (640, 480)
-camera.framerate = 25
-rawCapture = PiRGBArray(camera, size=(640, 480))
+#camera = PiCamera()
+#camera.resolution = (640, 480)
+#camera.framerate = 25
+#rawCapture = PiRGBArray(camera, size=(640, 480))
 
-time.sleep(0.1)
+videoStream = PiVideoStream(framerate=10).start()
+
+time.sleep(2.0)
+fps = FPS().start()
 
 #define color range
 greenLower = (57, 165, 39)
@@ -34,8 +39,8 @@ greenUpper = (100, 255, 255)
 
 pts = deque(maxlen=64)
 
-for frame in camera.capture_continuous(rawCapture, format = "bgr", use_video_port=True):
-    frame = frame.array
+while True:
+    frame = videoStream.read()
     hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
     frame = cv2.GaussianBlur(hsv, (11,11),0)
 
@@ -53,7 +58,6 @@ for frame in camera.capture_continuous(rawCapture, format = "bgr", use_video_por
         M = cv2.moments(c)
         center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
         if cv2.contourArea(c)< 500:
-            rawCapture.truncate(0)
             continue
 
         if radius > 10:
@@ -76,10 +80,14 @@ for frame in camera.capture_continuous(rawCapture, format = "bgr", use_video_por
         cv2.imshow("Frame", frame)
     key = cv2.waitKey(1) & 0xFF
 
-    rawCapture.truncate(0)
+    fps.update()
 
     if key == ord("q"):
         break
-
-sok.close()
-cv2.destroyAllWindows()
+fps.stop()
+print "FPS: {:.2f}".format(fps.fps())
+if SEND2TCP:
+    sok.close()
+if SHOW:
+    cv2.destroyAllWindows()
+videoStream.stop()
