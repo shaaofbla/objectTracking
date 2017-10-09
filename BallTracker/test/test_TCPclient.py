@@ -52,6 +52,7 @@ class TestTCPclient(unittest.TestCase):
 
     def test_tcp_socket(self):
         self.assertRaises(Exception,self.tcp_client.connect())
+
     """
     def test_tcp_test_server(self):
         clientThread = multiprocessing.Process(target=self.tcp_client.connect())
