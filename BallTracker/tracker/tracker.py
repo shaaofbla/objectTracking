@@ -1,22 +1,31 @@
 import cv2
 from utils.pivideostream import PiVideoStream
 from utils.object import Object
+import utils.TrackerConfig as config
 from collections import deque
 import time
 
 class Tracker:
-    def __init__(self, lower, upper):
+    def __init__(self, lower=(0,0,0), upper=(255,255,255)):
         self.FilterLower = lower
         self.FilterUpper = upper
         self.Framerate = 33
         self.Resolution = (640,480)
-        self.videoStream = PiVideoStream(framerate=self.Framerate,resolution = self.Resolution)
+        self.videoStream = None
         self.Object = Object()
 
     def __del__(self):
         pass
 
+    def config(self):
+        self.FilterLower = config.FILTER_LOWER
+        self.FilterUpper = config.FILTER_UPPER
+        self.Framerate = config.FRAMERATE
+        self.Resolution = config.RESOLUTION
+
+
     def start(self):
+        self.videoStream = PiVideoStream(framerate=self.Framerate,resolution = self.Resolution)
         self.videoStream.start()
         time.sleep(2)
         return
@@ -78,7 +87,7 @@ class Tracker:
                     cv2.FONT_HERSHEY_SIMPLEX,
                     1,(255,255,50), 1, cv2.LINE_AA)
 
-    def DrawPath():
+    def DrawPath(self):
         points = self.Object.Path
         for i in xrange(1, len(points)):
             if points[i-1] is None or points[i] is None:

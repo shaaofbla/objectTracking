@@ -13,7 +13,7 @@ class TestTracker(unittest.TestCase):
         del testTracker
 
     @unittest.skip("not working")
-    def test_start_piVideoStream(self):
+    def test_frame_shape_returned_by_piVideoStream(self):
         testTracker = Tracker(lower =(0,0,0),upper=(255,255,255))
         testTracker.start()
         frame = testTracker.videoStream.read()
@@ -22,12 +22,18 @@ class TestTracker(unittest.TestCase):
         self.assertEqual(frameShape,expectedFrameShape)
         testTracker.close()
 
+    def test_start_piVideoStream(self):
+        testTracker = Tracker(lower = (0,0,0), upper = (255,255,255))
+        testTracker.start()
+        self.assertFalse(testTracker.videoStream.camera.closed)
+        testTracker.close()
+
+
     def test_piVideoStream_closed(self):
         testTracker = Tracker(lower =(0,0,0),upper=(255,255,255))
         testTracker.start()
         testTracker.videoStream.read()
         testTracker.close()
-        frame = testTracker.videoStream.read()
-        self.assertIsNone(frame)
+        self.assertTrue(testTracker.videoStream.camera.closed)
         del testTracker
 
