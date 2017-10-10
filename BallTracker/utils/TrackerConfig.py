@@ -1,0 +1,21 @@
+#[picamera]
+FRAMERATE = 33
+RESOLUTION = (320, 240)
+
+#[TCPserver]
+SEND2TCP = True
+TCP_IP = '192.168.0.11'
+TCP_PORT = 5005
+BUFFER_SIZE = 60
+
+#[TrackerSettings]
+SHOW = False
+SHOW_CIRCLE = True
+SHOW_PATH = True
+FILTER_LOWER = (57, 165, 39)
+FILTER_UPPER = (100, 255, 255)
+if not SHOW:
+    SHOW_CIRCLE = False
+    SHOW_PATH = False
+
+
