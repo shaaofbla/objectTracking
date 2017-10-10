@@ -1,5 +1,5 @@
 #[picamera]
-FRAMERATE = 33
+FRAMERATE = 30
 RESOLUTION = (320, 240)
 
 #[TCPserver]

@@ -3,6 +3,7 @@ from tracker.tracker import Tracker
 from imutils.video import FPS
 from TCP.client import client
 import numpy as np
+import socket
 import time
 import cv2
 
@@ -22,13 +23,20 @@ while True:
         BallTracker.ProcessFrame()
         if BallTracker.Object.Present:
             if BallTracker.Object.radius > 10:
-                message = "{:.2f}\t{:.2f}\t{:.2f}".format(BallTracker.Object.x,BallTracker.Object.y,BallTracker.Object.radius)
-                TCPclient.send(message)
-
+                TCPclient.sendxyr(BallTracker)
         fps.update()
 
     except KeyboardInterrupt:
         break
+    except socket.error as e:
+        print e
+        print "restarting client"
+        TCPclient.close()
+        del TCPclient
+        TCPclient = client()
+        TCPclient.config()
+        TCPclient.connect()
+        continue
 
 fps.stop()
 
