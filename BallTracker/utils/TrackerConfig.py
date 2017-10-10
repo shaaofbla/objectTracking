@@ -9,7 +9,7 @@ TCP_PORT = 5005
 BUFFER_SIZE = 60
 
 #[TrackerSettings]
-SHOW = False
+SHOW = True
 SHOW_CIRCLE = True
 SHOW_PATH = True
 FILTER_LOWER = (57, 165, 39)
