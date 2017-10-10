@@ -15,11 +15,16 @@ class client:
         self.buffer_size = config.BUFFER_SIZE
 
     def connect(self):
-        try:
-            self.socket.connect((self.ip, self.port))
-            return
-        except Exception as exc:
-            print "Caught exception socket.error: %s" % exc
+        while True:
+            try:
+                self.socket.connect((self.ip, self.port))
+                return
+            except Exception as exc:
+                print "Caught exception socket.error: %s" % exc
+                print "Couln't connect, try again in a moment."
+                time.sleep(5)
+            except KeyboardInterrupt:
+                return
 
     def send(self,message):
         self.socket.send(message)
