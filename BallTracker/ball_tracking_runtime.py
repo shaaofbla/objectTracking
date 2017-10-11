@@ -33,7 +33,7 @@ while True:
         print "restarting client"
         TCPclient.close()
         del TCPclient
-        TCPclient = client()
+        TPclient = client()
         TCPclient.config()
         TCPclient.connect()
         continue
