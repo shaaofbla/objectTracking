@@ -4,6 +4,7 @@ from utils.object import Object
 import utils.TrackerConfig as config
 from collections import deque
 import time
+import numpy as np
 
 class Tracker:
     def __init__(self, lower=(0,0,0), upper=(255,255,255)):
@@ -57,8 +58,7 @@ class Tracker:
     def getCenter(self):
         M = self.Object.Moments
         center = (int(M["m10"] / M["m00"]), int(M["m01"] / M["m00"]))
-        self.Object.center = center
-
+        self.Object.Center = center
 
     def getMoments(self, contour):
         self.Object.Moments = cv2.moments(contour)
@@ -80,19 +80,27 @@ class Tracker:
                   int(self.Object.radius),
                  (141, 255,8),2)
         cv2.circle(self.videoStream.frame,(int(self.Object.x),int(self.Object.y)), 5, (0,141,244),-1)
-        cv2.circle(self.videoStream.frame,self.Object.center, 5,(251,0,194), -1)
+        cv2.circle(self.videoStream.frame,self.Object.Center, 5,(251,0,194), -1)
+
+    def DrawCoordinates(self):
         cv2.putText(self.videoStream.frame,
                     "x: {:.2f} -  y: {:.2f}".format(self.Object.x,self.Object.y),
-                    (10,int(self.Resolution[1])-50),
+                    (10,int(self.Resolution[1])-10),
                     cv2.FONT_HERSHEY_SIMPLEX,
-                    1,(255,255,50), 1, cv2.LINE_AA)
+                    0.4,(255,255,50), 1, cv2.LINE_AA)
+
+    def DrawScreenCenter(self):
+        color = (255,15,65)
+        thik = 1
+        cv2.line(self.videoStream.frame, (0,0),(self.Resolution), color,thik)
+        cv2.line(self.videoStream.frame,(self.Resolution[0],0),(0,self.Resolution[1]), color,thik)
 
     def DrawPath(self):
         points = self.Object.Path
         for i in xrange(1, len(points)):
             if points[i-1] is None or points[i] is None:
                 continue
-            LineThickness = int(np.sqrt(64 / float(i+1)) * 2.5)
+            LineThickness = int(np.sqrt(64 / float(i+1)) * 1.5)
             cv2.line(self.videoStream.frame, points[i-1], points[i],(8,82,255),LineThickness)
         return
 
