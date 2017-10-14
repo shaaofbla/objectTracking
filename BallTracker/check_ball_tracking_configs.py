@@ -2,18 +2,41 @@ from utils.pivideostream import PiVideoStream
 from tracker.tracker import Tracker
 from imutils.video import FPS
 from TCP.client import client
-from utils.TrackerConfig import SEND2TCP
-from utils.TrackerConfig import SHOW, SHOW_CIRCLE, SHOW_PATH, SHOW_COORDINATES, SHOW_SCREEN_CENTER
+#from utils.TrackerConfig import SEND2TCP
+#from utils.TrackerConfig import SHOW, SHOW_CIRCLE, SHOW_PATH, SHOW_COORDINATES, SHOW_SCREEN_CENTER, FLIP
 import numpy as np
 import time
 import socket
 import cv2
+import argparse
 #import sys #get rid of this
 
-TCPclient = client()
-TCPclient.config()
-TCPclient.connect()
+parser = argparse.ArgumentParser()
+parser.add_argument("-SHOW", help="Do you want to show a preview window?", action='store_false')
+parser.add_argument("-SEND2TCP", help = "Do you want to establish a connection to the TCP server?", action='store_true')
+parser.add_argument("-SHOW_CIRCLE", help = "Do you want to draw the circle?", action='store_false')
+parser.add_argument("-SHOW_PATH", help = "Do you want to draw the path?", action='store_false')
+parser.add_argument("-SHOW_COORDINATES", help = "Do you want to show the coordinates?", action='store_false')
+parser.add_argument("-SHOW_SCREEN_CENTER", help = "Do you want to draw the screen center?", action='store_false')
+parser.add_argument("-FLIP", help = "Do you want to flip the x coordinate (get mirror image)?", action='store_true')
+parser.add_argument("-MASK", help = "Do you want to flip the x coordinate (get mirror image)?", action='store_true')
+parser.add_argument("-FRAME", help = "Do you want to flip the x coordinate (get mirror image)?", action='store_true')
 
+args = parser.parse_args()
+print args
+
+if args.SEND2TCP:
+    TCPclient = client()
+    TCPclient.config()
+    TCPclient.connect()
+
+if not args.SHOW:
+    args.SHOW_CIRCLE = False
+    args.SHOW_PATH = False
+    args.SHOW_COORDINATES = False
+    args.SHOW_SCREEN_CENTER = False
+
+print args
 
 BallTracker = Tracker()
 BallTracker.config()
@@ -26,24 +49,36 @@ while True:
         BallTracker.ProcessFrame()
         BallTracker.RecordPath()
         if BallTracker.Object.Present:
+            if args.FLIP:
+                BallTracker.Frame = cv2.flip(BallTracker.videoStream.frame,0)#BallTracker.videoStream.frame.copy(
+            else:
+                BallTracker.Frame = BallTracker.videoStream.frame.copy()
+
             if BallTracker.Object.radius > 10:
-                if SHOW_PATH:
+                if args.SHOW_PATH:
                     BallTracker.DrawPath()
 
-                if SHOW_CIRCLE:
+                if args.SHOW_CIRCLE:
                     BallTracker.DrawCircle()
 
-                if SEND2TCP:
+                if args.SEND2TCP:
                     TCPclient.sendxyr(BallTracker)
             #BallTracker.RecordPath()
-                if SHOW_COORDINATES:
+                if args.SHOW_COORDINATES:
                     BallTracker.DrawCoordinates()
 
-                if SHOW_SCREEN_CENTER:
+                if args.SHOW_SCREEN_CENTER:
                     BallTracker.DrawScreenCenter()
 
-                if SHOW:
+                if args.FRAME:
                     cv2.imshow("Frame", BallTracker.videoStream.frame)
+                    print BallTracker.videoStream.frame.shape
+
+                if args.SHOW:
+                    cv2.imshow("Annotated_Frame", BallTracker.Frame)
+
+                if args.MASK:
+                    cv2.imshow("Mask", BallTracker.mask)
 
         key = cv2.waitKey(1) & 0xFF
         fps.update()
@@ -67,9 +102,9 @@ while True:
 
 fps.stop()
 print "FPS: {:.2f}".format(fps.fps())
-if SEND2TCP:
+if args.SEND2TCP:
     TCPclient.close()
-if SHOW:
+if args.SHOW:
     cv2.destroyAllWindows()
 
 BallTracker.close()

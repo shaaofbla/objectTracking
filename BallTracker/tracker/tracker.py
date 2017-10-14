@@ -11,6 +11,7 @@ class Tracker:
         self.FilterLower = lower
         self.FilterUpper = upper
         self.Framerate = 33
+        self.Frame = None
         self.Resolution = (640,480)
         self.videoStream = None
         self.Object = Object()
@@ -43,6 +44,7 @@ class Tracker:
         mask = cv2.inRange(blure, self.FilterLower, self.FilterUpper)
         mask = cv2.erode(mask, None, iterations=2)
         mask = cv2.dilate(mask, None, iterations=2)
+        self.mask = mask
 
         contours = cv2.findContours(mask.copy(), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)[-2]
 
@@ -75,15 +77,15 @@ class Tracker:
         self.Object.PathAppendPoint(self.Object.Center)
 
     def DrawCircle(self):
-        cv2.circle(self.videoStream.frame,
+        cv2.circle(self.Frame,
                   (int(self.Object.x), int(self.Object.y)),
                   int(self.Object.radius),
                  (141, 255,8),2)
-        cv2.circle(self.videoStream.frame,(int(self.Object.x),int(self.Object.y)), 5, (0,141,244),-1)
-        cv2.circle(self.videoStream.frame,self.Object.Center, 5,(251,0,194), -1)
+        cv2.circle(self.Frame,(int(self.Object.x),int(self.Object.y)), 5, (0,141,244),-1)
+        #cv2.circle(self.Frame,self.Object.Center, 5,(251,0,194), -1)
 
     def DrawCoordinates(self):
-        cv2.putText(self.videoStream.frame,
+        cv2.putText(self.Frame,
                     "x: {:.2f} -  y: {:.2f}".format(self.Object.x,self.Object.y),
                     (10,int(self.Resolution[1])-10),
                     cv2.FONT_HERSHEY_SIMPLEX,
@@ -92,8 +94,8 @@ class Tracker:
     def DrawScreenCenter(self):
         color = (255,15,65)
         thik = 1
-        cv2.line(self.videoStream.frame, (0,0),(self.Resolution), color,thik)
-        cv2.line(self.videoStream.frame,(self.Resolution[0],0),(0,self.Resolution[1]), color,thik)
+        cv2.line(self.Frame, (0,0),(self.Resolution), color,thik)
+        cv2.line(self.Frame,(self.Resolution[0],0),(0,self.Resolution[1]), color,thik)
 
     def DrawPath(self):
         points = self.Object.Path
@@ -101,6 +103,6 @@ class Tracker:
             if points[i-1] is None or points[i] is None:
                 continue
             LineThickness = int(np.sqrt(64 / float(i+1)) * 1.5)
-            cv2.line(self.videoStream.frame, points[i-1], points[i],(8,82,255),LineThickness)
+            cv2.line(self.Frame, points[i-1], points[i],(8,82,255),LineThickness)
         return
 
