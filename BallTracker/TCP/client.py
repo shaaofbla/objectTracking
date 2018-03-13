@@ -35,7 +35,7 @@ class client:
         x = tracker.Object.x
         y = tracker.Object.y
         r = tracker.Object.radius
-        message = "{:.2f}\t{:.2f}\t{:.2f}\t".format(x,y,r)
+        message = "{:.2f}\t{:.2f}\t{:.2f}\t\n".format(x,y,r)
         self.send(message)
 
     def close(self):
