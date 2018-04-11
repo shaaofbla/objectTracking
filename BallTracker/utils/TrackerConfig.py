@@ -1,15 +1,17 @@
-#[picamera]
+# [picamera]
 FRAMERATE = 30
 RESOLUTION = (320, 240)
 
-#[TCPserver]
-TCP_IP = '192.168.0.25'
-TCP_PORT = 5006
+# [TCPserver]
+TCP_IP = '192.168.0.18'
+TCP_PORT = 5007
 BUFFER_SIZE = 60
 
-#Filter settings
-FILTER_LOWER = (140,138,42)
-FILTER_UPPER = (181,255,174)
+# [OSCserver]
+NAME = "CamA"
+OSC_IP = '192.168.0.18'
+OSC_PORT = 5007
 
-
-
+# Filter settings
+FILTER_LOWER = (144, 78, 74)
+FILTER_UPPER = (203, 255, 255)

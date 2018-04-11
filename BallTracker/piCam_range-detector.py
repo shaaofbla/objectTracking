@@ -3,14 +3,10 @@
 
 import cv2
 from picamera.array import PiRGBArray
-import io
 from picamera import PiCamera
-import numpy as np
-import argparse
 import colorsys
 import os
 import time
-#from operator import xor
 
 
 def callback(value):
@@ -26,6 +22,7 @@ def setup_trackbars(range_filter):
         for j in range_filter:
             cv2.createTrackbar("%s_%s" % (j, i), "Trackbars", v, 255, callback)
 
+
 def get_trackbar_values(range_filter):
     values = []
 
@@ -39,27 +36,26 @@ def get_trackbar_values(range_filter):
 
 def main(configFile):
     range_filter = 'HSV'
-
-    #frame_to_thresh = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
     camera = cv2.VideoCapture(0)
 
     setup_trackbars(range_filter)
-    stream = io.BytesIO()
 
-    #init picamera
+    # init picamera
     camera = PiCamera()
     camera.resolution = (320, 240)
-    rawCapture = PiRGBArray(camera, size=(320,240))
-    for frame in camera.capture_continuous(rawCapture, format = "bgr", use_video_port=True):
+    rawCapture = PiRGBArray(camera, size=(320, 240))
+    for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
         frame = frame.array
         frame_to_thresh = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
 
         H_min, S_min, V_min, H_max, S_max, V_max = get_trackbar_values(range_filter)
 
-        thresh = cv2.inRange(frame_to_thresh, (H_min, S_min, V_min), (H_max, S_max, V_max))
-        color = colorsys.hsv_to_rgb(H_max/255,S_max/255,V_max/255)
-        color = (int(color[0]*255),int(color[1]*255),int(color[2]*255))
-        cv2.rectangle(frame,(320-40,10),(320-10,19),color = color,thickness=10)
+        thresh = cv2.inRange(frame_to_thresh,
+                             (H_min, S_min, V_min),
+                             (H_max, S_max, V_max))
+        color = colorsys.hsv_to_rgb(H_max/255, S_max/255, V_max/255)
+        color = (int(color[0]*255), int(color[1]*255), int(color[2]*255))
+        cv2.rectangle(frame, (320-40, 10), (320-10, 19), color=color, thickness=10)
 
         cv2.imshow("Original", frame)
         cv2.imshow("Thresh", thresh)
@@ -73,13 +69,13 @@ def main(configFile):
                 with open(configFile, 'r') as input_file, open('utils/new_file', 'w') as output_file:
                     for line in input_file:
                         if line.startswith("FILTER_LOWER"):
-                            output_file.write('FILTER_LOWER = ({0},{1},{2})\n'.format(H_min,S_min,V_min))
+                            output_file.write('FILTER_LOWER = ({0},{1},{2})\n'.format(H_min, S_min, V_min))
                         elif line.startswith("FILTER_UPPER"):
-                            output_file.write('FILTER_UPPER = ({0},{1},{2})\n'.format(H_max,S_max,V_max))
+                            output_file.write('FILTER_UPPER = ({0},{1},{2})\n'.format(H_max, S_max, V_max))
                         else:
                             output_file.write(line)
-                    os.rename(configFile,configFile+"old_{0}.back".format(time.time()))
-                    os.rename('utils/new_file',configFile)
+                    os.rename(configFile, configFile+"old_{0}.back".format(time.time()))
+                    os.rename('utils/new_file', configFile)
                     break
 
 

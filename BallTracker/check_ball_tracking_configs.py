@@ -1,26 +1,20 @@
-from utils.pivideostream import PiVideoStream
 from tracker.tracker import Tracker
 from imutils.video import FPS
 from TCP.client import client
-#from utils.TrackerConfig import SEND2TCP
-#from utils.TrackerConfig import SHOW, SHOW_CIRCLE, SHOW_PATH, SHOW_COORDINATES, SHOW_SCREEN_CENTER, FLIP
-import numpy as np
-import time
 import socket
 import cv2
 import argparse
-#import sys #get rid of this
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-SHOW", help="Do you want to show a preview window?", action='store_false')
-parser.add_argument("-SEND2TCP", help = "Do you want to establish a connection to the TCP server?", action='store_true')
-parser.add_argument("-SHOW_CIRCLE", help = "Do you want to draw the circle?", action='store_false')
-parser.add_argument("-SHOW_PATH", help = "Do you want to draw the path?", action='store_false')
-parser.add_argument("-SHOW_COORDINATES", help = "Do you want to show the coordinates?", action='store_false')
-parser.add_argument("-SHOW_SCREEN_CENTER", help = "Do you want to draw the screen center?", action='store_false')
-parser.add_argument("-FLIP", help = "Do you want to flip the x coordinate (get mirror image)?", action='store_true')
-parser.add_argument("-MASK", help = "Do you want to flip the x coordinate (get mirror image)?", action='store_true')
-parser.add_argument("-FRAME", help = "Do you want to flip the x coordinate (get mirror image)?", action='store_true')
+parser.add_argument("-SEND2TCP", help="Do you want to establish a connection to the TCP server?", action='store_true')
+parser.add_argument("-SHOW_CIRCLE", help="Do you want to draw the circle?", action='store_false')
+parser.add_argument("-SHOW_PATH", help="Do you want to draw the path?", action='store_false')
+parser.add_argument("-SHOW_COORDINATES", help="Do you want to show the coordinates?", action='store_false')
+parser.add_argument("-SHOW_SCREEN_CENTER", help="Do you want to draw the screen center?", action='store_false')
+parser.add_argument("-FLIP", help="Do you want to flip the x coordinate (get mirror image)?", action='store_true')
+parser.add_argument("-MASK", help="Do you want to flip the x coordinate (get mirror image)?", action='store_true')
+parser.add_argument("-FRAME", help="Do you want to flip the x coordinate (get mirror image)?", action='store_true')
 
 args = parser.parse_args()
 print args
@@ -50,7 +44,7 @@ while True:
         BallTracker.RecordPath()
         if BallTracker.Object.Present:
             if args.FLIP:
-                BallTracker.Frame = cv2.flip(BallTracker.videoStream.frame,0)#BallTracker.videoStream.frame.copy(
+                BallTracker.Frame = cv2.flip(BallTracker.videoStream.frame, 0)
             else:
                 BallTracker.Frame = BallTracker.videoStream.frame.copy()
 

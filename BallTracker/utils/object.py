@@ -9,8 +9,8 @@ class Object():
         self.Moments = None
         self.Center = None
         self.Path_length = 64
-        self.Path = deque(maxlen = self.Path_length)
+        self.Path = deque(maxlen=self.Path_length)
 
-    def PathAppendPoint(self,point):
+    def PathAppendPoint(self, point):
         self.Path.appendleft(point)
         return

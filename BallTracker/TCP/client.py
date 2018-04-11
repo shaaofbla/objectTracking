@@ -2,8 +2,9 @@ import socket
 import time
 import utils.TrackerConfig as config
 
+
 class client:
-    def __init__(self,ip='192.168.0.11',port=5005,buffer_size=60):
+    def __init__(self, ip='192.168.0.11', port=5005, buffer_size=60):
         self.ip = ip
         self.port = port
         self.buffer_size = buffer_size
@@ -27,7 +28,7 @@ class client:
             except KeyboardInterrupt:
                 return
 
-    def send(self,message):
+    def send(self, message):
         self.socket.send(message)
         return
 
@@ -35,7 +36,7 @@ class client:
         x = tracker.Object.x
         y = tracker.Object.y
         r = tracker.Object.radius
-        message = "{:.2f}\t{:.2f}\t{:.2f}\t\n".format(x,y,r)
+        message = "{:.2f}\t{:.2f}\t{:.2f}\t\n".format(x, y, r)
         self.send(message)
 
     def close(self):

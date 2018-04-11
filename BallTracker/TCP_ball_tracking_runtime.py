@@ -1,11 +1,7 @@
-from utils.pivideostream import PiVideoStream
 from tracker.tracker import Tracker
 from imutils.video import FPS
 from TCP.client import client
-import numpy as np
 import socket
-import time
-import cv2
 
 TCPclient = client()
 TCPclient.config()
