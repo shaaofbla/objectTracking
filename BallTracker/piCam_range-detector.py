@@ -62,9 +62,9 @@ def main(configFile):
         rawCapture.truncate(0)
 
         if cv2.waitKey(1) & 0xFF is ord('q'):
-            print "H_min: ", H_min, "H_max: ", H_max, "S_min: ", S_min, "S_max: ", S_max, "V_min: ", V_min, "V_max: ", V_max
+            print("H_min: ", H_min, "H_max: ", H_max, "S_min: ", S_min, "S_max: ", S_max, "V_min: ", V_min, "V_max: ", V_max)
             save = raw_input("Do you want to store these values in the config file? (y/n)")
-            print save
+            print(save)
             if save == "y":
                 with open(configFile, 'r') as input_file, open('utils/new_file', 'w') as output_file:
                     for line in input_file:

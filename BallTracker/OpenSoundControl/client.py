@@ -9,9 +9,9 @@ class client:
 
     def config(self):
         self.name = config.NAME
-        print "Name of Camera: ", self.name
+        print("Name of Camera: ", self.name)
         self.client.connect((config.OSC_IP, config.OSC_PORT))
-        print "connecting to {} on port {}".format(config.OSC_IP, config.OSC_PORT)
+        print("connecting to {} on port {}".format(config.OSC_IP, config.OSC_PORT))
 
     def send(self, message):
         oscmsg = OSC.OSCMessage()

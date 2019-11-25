@@ -17,7 +17,7 @@ parser.add_argument("-MASK", help="Do you want to flip the x coordinate (get mir
 parser.add_argument("-FRAME", help="Do you want to flip the x coordinate (get mirror image)?", action='store_true')
 
 args = parser.parse_args()
-print args
+print(args)
 
 if args.SEND2TCP:
     TCPclient = client()
@@ -30,7 +30,7 @@ if not args.SHOW:
     args.SHOW_COORDINATES = False
     args.SHOW_SCREEN_CENTER = False
 
-print args
+print(args)
 
 BallTracker = Tracker()
 BallTracker.config()
@@ -66,7 +66,7 @@ while True:
 
                 if args.FRAME:
                     cv2.imshow("Frame", BallTracker.videoStream.frame)
-                    print BallTracker.videoStream.frame.shape
+                    print(BallTracker.videoStream.frame.shape)
 
                 if args.SHOW:
                     cv2.imshow("Annotated_Frame", BallTracker.Frame)
@@ -78,15 +78,15 @@ while True:
         fps.update()
 
         if key == ord("q"):
-            print key
+            print(key)
             raise
 
     except KeyboardInterrupt:
         break
 
     except socket.error as e:
-        print e
-        print "[Main] Restarting client"
+        print(e)
+        print("[Main] Restarting client")
         TCPclient.close()
         del TCPclient
         TCPclient = client()
@@ -95,7 +95,7 @@ while True:
         continue
 
 fps.stop()
-print "FPS: {:.2f}".format(fps.fps())
+print("FPS: {:.2f}".format(fps.fps()))
 if args.SEND2TCP:
     TCPclient.close()
 if args.SHOW:

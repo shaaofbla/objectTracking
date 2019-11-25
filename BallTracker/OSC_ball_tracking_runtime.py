@@ -25,6 +25,6 @@ while True:
 
 fps.stop()
 
-print "FPS: {:.2f}".format(fps.fps())
+print("FPS: {:.2f}".format(fps.fps()))
 BallTracker.close()
 del BallTracker

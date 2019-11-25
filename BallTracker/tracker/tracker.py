@@ -31,7 +31,7 @@ class Tracker:
     def setMaxRadius(self):
         maxRad = np.sqrt(np.sum(np.power(self.Resolution, 2)))
         self.MaxRadius = maxRad
-        print self.MaxRadius
+        print(self.MaxRadius)
 
     def start(self):
         self.videoStream = PiVideoStream(framerate=self.Framerate,

@@ -19,11 +19,11 @@ class client:
         while True:
             try:
                 self.socket.connect((self.ip, self.port))
-                print "connected to: ", self.ip
+                print("connected to: ", self.ip)
                 return
             except Exception as exc:
-                print "Caught exception socket.error: %s" % exc
-                print "Couln't connect, try again in a moment."
+                print("Caught exception socket.error: %s" % exc)
+                print("Couln't connect, try again in a moment.")
                 time.sleep(5)
             except KeyboardInterrupt:
                 return
