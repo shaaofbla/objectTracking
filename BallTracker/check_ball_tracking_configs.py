@@ -7,7 +7,7 @@ import argparse
 
 parser = argparse.ArgumentParser()
 parser.add_argument("-SHOW", help="Do you want to show a preview window?", action='store_false')
-parser.add_argument("-SEND2TCP", help="Do you want to establish a connection to the TCP server?", action='store_true')
+parser.add_argument("-SENDOSC", help="Do you want to send an OSC Message?", action='store_true')
 parser.add_argument("-SHOW_CIRCLE", help="Do you want to draw the circle?", action='store_false')
 parser.add_argument("-SHOW_PATH", help="Do you want to draw the path?", action='store_false')
 parser.add_argument("-SHOW_COORDINATES", help="Do you want to show the coordinates?", action='store_false')
@@ -19,10 +19,9 @@ parser.add_argument("-FRAME", help="Do you want to flip the x coordinate (get mi
 args = parser.parse_args()
 print(args)
 
-if args.SEND2TCP:
-    TCPclient = client()
-    TCPclient.config()
-    TCPclient.connect()
+if args.SENDOSC:
+    OSCclient = client()
+    OSCclient.config()
 
 if not args.SHOW:
     args.SHOW_CIRCLE = False
@@ -47,16 +46,17 @@ while True:
                 BallTracker.Frame = cv2.flip(BallTracker.videoStream.frame, 0)
             else:
                 BallTracker.Frame = BallTracker.videoStream.frame.copy()
-
-            if BallTracker.Object.radius > 10:
+            print(BallTracker.Object.radius)
+            BallTracker.DrawSquare()
+            if BallTracker.Object.radius > 0.01:
                 if args.SHOW_PATH:
                     BallTracker.DrawPath()
 
                 if args.SHOW_CIRCLE:
                     BallTracker.DrawCircle()
 
-                if args.SEND2TCP:
-                    TCPclient.sendxyr(BallTracker)
+                if args.SENDOSC:
+                    OSCclient.sendxyr(BallTracker)
             #BallTracker.RecordPath()
                 if args.SHOW_COORDINATES:
                     BallTracker.DrawCoordinates()
@@ -84,20 +84,8 @@ while True:
     except KeyboardInterrupt:
         break
 
-    except socket.error as e:
-        print(e)
-        print("[Main] Restarting client")
-        TCPclient.close()
-        del TCPclient
-        TCPclient = client()
-        TCPclient.config()
-        TCPclient.connect()
-        continue
-
 fps.stop()
 print("FPS: {:.2f}".format(fps.fps()))
-if args.SEND2TCP:
-    TCPclient.close()
 if args.SHOW:
     cv2.destroyAllWindows()
 

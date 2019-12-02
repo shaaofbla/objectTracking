@@ -2,6 +2,8 @@ import cv2
 from utils.pivideostream import PiVideoStream
 from utils.object import Object
 import utils.TrackerConfig as config
+from utils.Roi import Roi
+from utils.Roi import fold
 import time
 import numpy as np
 
@@ -12,11 +14,13 @@ class Tracker:
         self.FilterUpper = upper
         self.Framerate = 33
         self.Frame = None
+        self.CameraResolution = (640, 480)
         self.Resolution = (640, 480)
         self.MaxRadius = None
         self.setMaxRadius()
         self.videoStream = None
         self.Object = Object()
+        self.Roi = Roi()
 
     def __del__(self):
         pass
@@ -25,19 +29,21 @@ class Tracker:
         self.FilterLower = config.FILTER_LOWER
         self.FilterUpper = config.FILTER_UPPER
         self.Framerate = config.FRAMERATE
+        self.cameraResolution = config.CAMERA_RESOLUTION
         self.Resolution = config.RESOLUTION
         self.setMaxRadius()
 
     def setMaxRadius(self):
         maxRad = np.sqrt(np.sum(np.power(self.Resolution, 2)))
         self.MaxRadius = maxRad
-        print(self.MaxRadius)
 
     def start(self):
+        print("stargin videostream")
         self.videoStream = PiVideoStream(framerate=self.Framerate,
-                                         resolution=self.Resolution)
+                                         resolution=self.cameraResolution)
         self.videoStream.start()
         time.sleep(2)
+        print("videostream started")
         return
 
     def close(self):
@@ -45,14 +51,27 @@ class Tracker:
         return
 
     def ProcessFrame(self):
-        frame = self.videoStream.read()
-        hsv = cv2.cvtColor(frame, cv2.COLOR_BGR2HSV)
+        self.Frame = self.videoStream.read()
+        print("Resolution:", self.Resolution)
+        print("cameraResolution:", self.cameraResolution)
+        print("original Frame:", self.Frame.shape)
+        self.Frame = cv2.resize(self.Frame, self.Resolution)
+        print("resized Frame:", self.Frame.shape)
+        if self.Roi.x is None:
+            RoiFrame = self.Frame
+        else:
+            RoiFrame = self.Frame[self.Roi.x:self.Roi.x2, self.Roi.y:self.Roi.y2]
+        print("Roi shape:", RoiFrame.shape)
+        print("Rois coords:", self.Roi.x, self.Roi.y, self.Roi.x2, self.Roi.y2)
+            
+        hsv = cv2.cvtColor(RoiFrame, cv2.COLOR_BGR2HSV)
         blure = cv2.GaussianBlur(hsv, (11, 11), 0)
 
         mask = cv2.inRange(blure, self.FilterLower, self.FilterUpper)
         mask = cv2.erode(mask, None, iterations=2)
         mask = cv2.dilate(mask, None, iterations=2)
-        self.mask = mask
+        #self.mask = mask
+        
 
         contours = cv2.findContours(mask.copy(),
                                     cv2.RETR_EXTERNAL,
@@ -64,8 +83,29 @@ class Tracker:
             self.getCoordinates(largest_contour)
             self.getMoments(largest_contour)
             self.getCenter()
+            self.setRoi()
+
         else:
             self.Object.Present = False
+            self.setRoiNone()
+
+    def setRoi(self):
+        f = 3.
+        x = (self.Object.x - self.Object.radius*f)*self.Resolution[0]
+        print("self.x", self.Object.x)
+        print("self.r", self.Object.radius)
+        print("self.Res", self.Resolution[0])
+        x = int(fold(x,0,self.Resolution[0]))
+        self.Roi.x = x
+        print("set Roi x:", x)
+        y = (self.Object.y - self.Object.radius*f)*self.Resolution[1]
+        y = int(fold(y,0,self.Resolution[1]))
+        self.Roi.y = y
+        print("set Roi y:", y)
+        w = int(self.Object.radius*2*f*self.Resolution[0])
+        self.Roi.x2 = int(x+w)
+        self.Roi.y2 = int(y+w)
+        self.Roi.w = w
 
     def getCenter(self):
         M = self.Object.Moments
@@ -78,8 +118,13 @@ class Tracker:
 
     def getCoordinates(self, contour):
         ((x, y), radius) = cv2.minEnclosingCircle(contour)
-        self.Object.x = x/self.Resolution[0]
-        self.Object.y = y/self.Resolution[1]
+        print("coords from cv3",x,y)
+        if self.Roi.x is None:
+            self.Object.x = x/self.Resolution[0]
+            self.Object.y = y/self.Resolution[1]
+        else:
+            self.Object.x = x/self.Resolution[0] + 1./self.Roi.x
+            self.Object.y = y/self.Resolution[1] + 1./self.Roi.y
         self.Object.radius = radius/self.MaxRadius
         return
 
@@ -88,14 +133,17 @@ class Tracker:
 
     def DrawCircle(self):
         cv2.circle(self.Frame,
-                   (int(self.Object.x),
-                    int(self.Object.y)),
+                   (int(self.Object.x*self.Resolution[0]),
+                    int(self.Object.y*self.Resolution[1])),
                    int(self.Object.radius),
                    (141, 255, 8), 2)
         cv2.circle(self.Frame,
                    (int(self.Object.x),
                     int(self.Object.y)),
                    5, (0, 141, 244), -1)
+
+    def DrawSquare(self):
+        cv2.rectangle(self.Frame, (self.Roi.x,self.Roi.y),(self.Roi.x2, self.Roi.y2), (255,0,255),1)
 
     def DrawCoordinates(self):
         cv2.putText(self.Frame,
@@ -114,7 +162,7 @@ class Tracker:
 
     def DrawPath(self):
         points = self.Object.Path
-        for i in xrange(1, len(points)):
+        for i in range(1, len(points)):
             if points[i-1] is None or points[i] is None:
                 continue
             LineThickness = int(np.sqrt(64 / float(i+1)) * 1.5)

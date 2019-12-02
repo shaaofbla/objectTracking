@@ -4,11 +4,19 @@ from threading import Thread
 
 
 class PiVideoStream:
-    def __init__(self, resolution=(320, 240), framerate=32):
+    def __init__(self,
+                 awb_mode = "sunlight",
+                 iso = 400,
+                 resolution=(320, 240),
+                 shutter_speed = 1000,
+                 framerate=32):
         # initialize the camera and stream
         self.camera = PiCamera()
         self.camera.resolution = resolution
         self.camera.framerate = framerate
+        self.camera.shutter_speed = shutter_speed
+        self.camera.ISO = iso
+        self.exposure_mode = 'off'
         self.rawCapture = PiRGBArray(self.camera, size=resolution)
         self.stream = self.camera.capture_continuous(self.rawCapture,
                                                      format="bgr",
@@ -57,3 +65,29 @@ class PiVideoStream:
     def stop(self):
         # indicate that the thread should be stopped
         self.stopped = True
+
+if __name__ == "__main__":
+    
+    import cv2
+    import time
+    from TrackerConfig import *
+    
+    print("awb Mode: ", CAMERA_AWB_MODE)
+    print("shutterspeed: ",CAMERA_SHUTTERSPEED)
+    print("resolution: ", CAMERA_RESOLUTION)
+    print("iso: ", CAMERA_ISO)
+    print("framerate: ", CAMERA_FRAMERATE)
+    stream = PiVideoStream(resolution = CAMERA_RESOLUTION,
+                           framerate = CAMERA_FRAMERATE,
+                           shutter_speed = CAMERA_SHUTTERSPEED,
+                           iso = CAMERA_ISO,
+                           awb_mode = CAMERA_AWB_MODE)
+    stream.start()
+    time.sleep(2)
+    
+    while True:
+        cv2.imshow("frame", stream.read())
+        key = cv2.waitKey(1)
+        if key == 27:
+            break
+        
